@@ -1,0 +1,60 @@
+version: '3'
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: app
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www/
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    # build:
+    #   context: ./web/
+    working_dir: /var/www
+    ports:
+      - "8001:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  db:
+    image: mysql:5.7
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci','--default-authentication-plugin=mysql_native_password']
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+        - "33061:3306"
+    volumes:
+      - ./db/dbdata:/var/lib/mysql
+      - ./db/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - app-network
+
+  # composer:
+  #   image: composer
+  #   environment:
+  #     - COMPOSER_CACHE_DIR=/app/var/cache/composer
+  #   volumes:
+  #     - .:/var/www/
+  #   restart: never
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
