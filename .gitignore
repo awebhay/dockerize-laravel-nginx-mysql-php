@@ -35,4 +35,5 @@ Homestead.json
 /.vagrant
 .phpunit.result.cache
 
+db/dbdata
 /db/dbdata
